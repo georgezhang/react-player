@@ -7,10 +7,10 @@ import { propTypes, defaultProps } from './props'
 import { omit } from './utils'
 import Player from './Player'
 
-const Preview = lazy(() => import(/* webpackChunkName: 'reactPlayerPreview' */'./Preview'))
+const Preview = lazy( () => import(/* webpackChunkName: 'reactPlayerPreview' */'./Preview' ) )
 
 const IS_BROWSER = typeof window !== 'undefined' && window.document
-const SUPPORTED_PROPS = Object.keys(propTypes)
+const SUPPORTED_PROPS = Object.keys( propTypes )
 
 // Return null when rendering on the server
 // as Suspense is not supported yet
@@ -18,17 +18,17 @@ const UniversalSuspense = IS_BROWSER ? Suspense : () => null
 
 const customPlayers = []
 
-export const createReactPlayer = (players, fallback) => {
+export const createReactPlayer = ( players, fallback ) => {
   return class ReactPlayer extends Component {
     static displayName = 'ReactPlayer'
     static propTypes = propTypes
     static defaultProps = defaultProps
-    static addCustomPlayer = player => { customPlayers.push(player) }
+    static addCustomPlayer = player => { customPlayers.push( player ) }
     static removeCustomPlayers = () => { customPlayers.length = 0 }
 
     static canPlay = url => {
-      for (const Player of [...customPlayers, ...players]) {
-        if (Player.canPlay(url)) {
+      for ( const Player of [ ...customPlayers, ...players ] ) {
+        if ( Player.canPlay( url ) ) {
           return true
         }
       }
@@ -36,8 +36,8 @@ export const createReactPlayer = (players, fallback) => {
     }
 
     static canEnablePIP = url => {
-      for (const Player of [...customPlayers, ...players]) {
-        if (Player.canEnablePIP && Player.canEnablePIP(url)) {
+      for ( const Player of [ ...customPlayers, ...players ] ) {
+        if ( Player.canEnablePIP && Player.canEnablePIP( url ) ) {
           return true
         }
       }
@@ -54,123 +54,125 @@ export const createReactPlayer = (players, fallback) => {
       player: player => { this.player = player }
     }
 
-    shouldComponentUpdate (nextProps, nextState) {
-      return !isEqual(this.props, nextProps) || !isEqual(this.state, nextState)
+    shouldComponentUpdate( nextProps, nextState ) {
+      return !isEqual( this.props, nextProps ) || !isEqual( this.state, nextState )
     }
 
-    componentDidUpdate (prevProps) {
+    componentDidUpdate( prevProps ) {
       const { light } = this.props
-      if (!prevProps.light && light) {
-        this.setState({ showPreview: true })
+      if ( !prevProps.light && light ) {
+        this.setState( { showPreview: true } )
       }
-      if (prevProps.light && !light) {
-        this.setState({ showPreview: false })
+      if ( prevProps.light && !light ) {
+        this.setState( { showPreview: false } )
       }
     }
 
-    handleClickPreview = () => {
-      this.setState({ showPreview: false })
+    handleClickPreview = ( event ) => {
+      this.setState( { showPreview: false } )
+      if ( this.props.handleClickPreview )
+        this.props.handleClickPreview( event );
     }
 
     showPreview = () => {
-      this.setState({ showPreview: true })
+      this.setState( { showPreview: true } )
     }
 
     getDuration = () => {
-      if (!this.player) return null
+      if ( !this.player ) return null
       return this.player.getDuration()
     }
 
     getCurrentTime = () => {
-      if (!this.player) return null
+      if ( !this.player ) return null
       return this.player.getCurrentTime()
     }
 
     getSecondsLoaded = () => {
-      if (!this.player) return null
+      if ( !this.player ) return null
       return this.player.getSecondsLoaded()
     }
 
-    getInternalPlayer = (key = 'player') => {
-      if (!this.player) return null
-      return this.player.getInternalPlayer(key)
+    getInternalPlayer = ( key = 'player' ) => {
+      if ( !this.player ) return null
+      return this.player.getInternalPlayer( key )
     }
 
-    seekTo = (fraction, type) => {
-      if (!this.player) return null
-      this.player.seekTo(fraction, type)
+    seekTo = ( fraction, type ) => {
+      if ( !this.player ) return null
+      this.player.seekTo( fraction, type )
     }
 
     handleReady = () => {
-      this.props.onReady(this)
+      this.props.onReady( this )
     }
 
-    getActivePlayer = memoize(url => {
-      for (const player of [...customPlayers, ...players]) {
-        if (player.canPlay(url)) {
+    getActivePlayer = memoize( url => {
+      for ( const player of [ ...customPlayers, ...players ] ) {
+        if ( player.canPlay( url ) ) {
           return player
         }
       }
-      if (fallback) {
+      if ( fallback ) {
         return fallback
       }
       return null
-    })
+    } )
 
-    getConfig = memoize((url, key) => {
+    getConfig = memoize( ( url, key ) => {
       const { config } = this.props
-      return merge.all([
+      return merge.all( [
         defaultProps.config,
-        defaultProps.config[key] || {},
+        defaultProps.config[ key ] || {},
         config,
-        config[key] || {}
-      ])
-    })
+        config[ key ] || {}
+      ] )
+    } )
 
-    getAttributes = memoize(url => {
-      return omit(this.props, SUPPORTED_PROPS)
-    })
+    getAttributes = memoize( url => {
+      return omit( this.props, SUPPORTED_PROPS )
+    } )
 
-    renderPreview (url) {
-      if (!url) return null
+    renderPreview( url ) {
+      if ( !url ) return null
       const { light, playIcon } = this.props
       return (
         <Preview
-          url={url}
-          light={light}
-          playIcon={playIcon}
-          onClick={this.handleClickPreview}
+          url={ url }
+          light={ light }
+          playIcon={ playIcon }
+          onClick={ this.handleClickPreview }
         />
       )
     }
 
     renderActivePlayer = url => {
-      if (!url) return null
-      const player = this.getActivePlayer(url)
-      if (!player) return null
-      const config = this.getConfig(url, player.key)
+      if ( !url ) return null
+      const player = this.getActivePlayer( url )
+      if ( !player ) return null
+      const config = this.getConfig( url, player.key )
       return (
         <Player
-          {...this.props}
-          key={player.key}
-          ref={this.references.player}
-          config={config}
-          activePlayer={player.lazyPlayer || player}
-          onReady={this.handleReady}
+          { ...this.props }
+          key={ player.key }
+          ref={ this.references.player }
+          config={ config }
+          activePlayer={ player.lazyPlayer || player }
+          onReady={ this.handleReady }
         />
       )
     }
 
-    render () {
+    render() {
       const { url, style, width, height, wrapper: Wrapper } = this.props
       const { showPreview } = this.state
-      const attributes = this.getAttributes(url)
+      const attributes = this.getAttributes( url )
       return (
-        <Wrapper ref={this.references.wrapper} style={{ ...style, width, height }} {...attributes}>
-          <UniversalSuspense fallback={null}>
-            {showPreview
-              ? this.renderPreview(url)
-              : this.renderActivePlayer(url)}
+        <Wrapper ref={ this.references.wrapper } style={ { ...style, width, height } } { ...attributes }>
+          <UniversalSuspense fallback={ null }>
+            { showPreview
+              ? this.renderPreview( url )
+              : this.renderActivePlayer( url ) }
           </UniversalSuspense>
         </Wrapper>
       )
