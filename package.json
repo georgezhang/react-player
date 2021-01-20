@@ -20,7 +20,8 @@
     "preversion": "npm run lint && npm run test",
     "version": "auto-changelog -p && npm run build:dist && npm run build:standalone && git add CHANGELOG.md dist",
     "prepublishOnly": "npm run build:lib && npm run build:lazy && npm run build:dist && node scripts/pre-publish.js && cp index.d.ts lazy",
-    "postpublish": "node scripts/post-publish.js && npm run clean"
+    "postpublish": "node scripts/post-publish.js && npm run clean",
+    "postinstall": "npm run prepublishOnly"
   },
   "repository": {
     "type": "git",
